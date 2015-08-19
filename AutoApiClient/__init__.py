@@ -17,24 +17,28 @@ class Client(object):
         finally:
             return object.__getattribute__(self, name)
 
+    def __getitem__(self, name):
+        return self.__getattribute__(name)
+
 
 class Api(object):
 
     def __init__(self, client, name):
         self.client = client
         self.name = name
+        self.logged = False
 
     def login(self, email, password):
         response = requests.post("%s/login" % self.client.url, json={
+            'api': self.name,
             'email': email,
-            'password': password,
-            'api': self.name
+            'password': password
         })
         if response.status_code == 200:
             self.logged = True
             self.headers = {
-                'X-User': email,
-                'X-Token': response.headers.get('X-Token')
+                'X-User': response.headers['X-Email'],
+                'X-Token': response.headers['X-Token']
             }
         return self.logged
 
@@ -42,17 +46,15 @@ class Api(object):
         try:
             return object.__getattribute__(self, name)
         except AttributeError:
-            try:
-                logged = object.__getattribute__(self, 'logged')
-            except AttributeError:
-                logged = False
-            finally:
-                if not logged:
-                    raise AutoApiAuthException(
-                        "You must be logged, use login method"
-                    )
-                object.__setattr__(self, name, Collection(self, name))
-                return object.__getattribute__(self, name)
+            if not object.__getattribute__(self, 'logged'):
+                raise AutoApiAuthException(
+                    "You must be logged, use login method"
+                )
+            object.__setattr__(self, name, Collection(self, name))
+            return object.__getattribute__(self, name)
+
+    def __getitem__(self, name):
+        return self.__getattribute__(name)
 
 
 class Collection(object):
