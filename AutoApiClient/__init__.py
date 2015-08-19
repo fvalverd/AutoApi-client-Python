@@ -117,12 +117,12 @@ class Resource(object):
         self.resource_id = resource_id
         response = requests.get(
             "%s/%s/%s/%s" % (
-                object.__getattribute__(self, 'collection').api.client.url,
-                object.__getattribute__(self, 'collection').api.name,
-                object.__getattribute__(self, 'collection').name,
-                object.__getattribute__(self, 'resource_id')
+                collection.api.client.url,
+                collection.api.name,
+                collection.name,
+                resource_id
             ),
-            headers=object.__getattribute__(self, 'collection').api.headers
+            headers=collection.api.headers
         )
         if response.status_code == 200:
             for key, value in response.json().iteritems():

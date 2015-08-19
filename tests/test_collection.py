@@ -7,10 +7,10 @@ from AutoApiClient import Client, Collection
 from AutoApiClient.exceptions import AutoApiAuthException
 
 
-class TestCollection(unittest.TestCase):
+class TestCollectionNotLogged(unittest.TestCase):
 
     def setUp(self):
-        super(TestCollection, self).setUp()
+        super(TestCollectionNotLogged, self).setUp()
         self.url = 'http://localhost:8686'
         self.client = Client(self.url)
 
@@ -22,10 +22,10 @@ class TestCollection(unittest.TestCase):
 
 
 @requests_mock.Mocker()
-class TestCollectionLogged(unittest.TestCase):
+class TestCollection(unittest.TestCase):
 
     def setUp(self):
-        super(TestCollectionLogged, self).setUp()
+        super(TestCollection, self).setUp()
         self.url = 'http://localhost:8686'
         self.email = 'user@email.com'
         self.fixture = {
