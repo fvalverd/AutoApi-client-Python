@@ -27,3 +27,18 @@ class TestResource(unittest.TestCase):
         mock.get('%s/api/collection/id_1' % self.url, status_code=200, json=self.fixture['id_1'])
         self.assertIsInstance(self.client.api.collection.id_1, Resource)
         self.assertIsInstance(self.client.api.collection['id_1'], Resource)
+
+    def test_delete_resource(self, mock):
+        mock.get('%s/api/collection/id_1' % self.url, status_code=200, json=self.fixture['id_1'])
+        mock.delete('%s/api/collection/id_1' % self.url, status_code=204)
+        self.assertTrue(self.client.api.collection.id_1.delete())
+
+    def test_put_resource(self, mock):
+        mock.get('%s/api/collection/id_1' % self.url, status_code=200, json=self.fixture['id_1'])
+        mock.put('%s/api/collection/id_1' % self.url, status_code=204)
+        self.assertTrue(self.client.api.collection.id_1.put(json=self.fixture['id_2']))
+
+    def test_patch_resource(self, mock):
+        mock.get('%s/api/collection/id_1' % self.url, status_code=200, json=self.fixture['id_1'])
+        mock.patch('%s/api/collection/id_1' % self.url, status_code=204)
+        self.assertTrue(self.client.api.collection.id_1.patch(json={'foo': 'bar'}))

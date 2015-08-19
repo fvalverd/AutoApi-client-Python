@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 
-from AutoApiClient.exceptions import AutoApiAuthException
+from AutoApiClient.exceptions import AutoApiAuthException, AutoApiResourceException
 
 
 class Client(object):
@@ -21,20 +21,38 @@ class Client(object):
         return self.__getattribute__(name)
 
 
-class Api(object):
+class AutoApiHttp(object):
 
-    def __init__(self, client, name):
-        self.client = client
-        self.name = name
+    def url(self):
+        return "%s/%s" % (self.parent.url(), self.id)
+
+    def _headers(self):
+        return self.parent._headers()
+
+    def _http(self, fun, url=None, *a, **ka):
+        return fun(url or self.url(), headers=self._headers(), *a, **ka)
+
+
+class Api(AutoApiHttp):
+
+    def __init__(self, parent, api_name):
+        self.parent = parent
+        self.id = api_name
         self.logged = False
         self.headers = {}
 
+    def url(self):
+        return "%s/%s" % (self.parent.url, self.id)
+
+    def _headers(self):
+        return self.headers
+
     def login(self, email, password):
-        response = requests.post("%s/login" % self.client.url, json={
-            'api': self.name,
-            'email': email,
-            'password': password
-        })
+        response = self._http(
+            requests.post,
+            url="%s/login" % self.parent.url,
+            params={'api': self.id, 'email': email, 'password': password}
+        )
         if response.status_code == 200:
             self.logged = True
             self.headers = {
@@ -47,9 +65,11 @@ class Api(object):
         return self.logged
 
     def logout(self):
-        response = requests.post("%s/logout" % self.client.url, json={
-            'api': self.name
-        })
+        self._http(
+            requests.post,
+            url="%s/logout" % self.parent.url,
+            json={'api': self.id}
+        )
         self.logged = False
         self.headers = {}
 
@@ -68,35 +88,19 @@ class Api(object):
         return self.__getattribute__(name)
 
 
-class Collection(object):
+class Collection(AutoApiHttp):
 
-    def __init__(self, api, name):
-        self.api = api
-        self.name = name
+    def __init__(self, parent, collection_name):
+        self.parent = parent
+        self.id = collection_name
 
     def get(self, params=None):
-        response = requests.get(
-            "%s/%s/%s" % (
-                object.__getattribute__(self, 'api').client.url,
-                object.__getattribute__(self, 'api').name,
-                object.__getattribute__(self, 'name')
-            ),
-            params=params,
-            headers=object.__getattribute__(self, 'api').headers
-        )
+        response = self._http(requests.get, params=params)
         if response.status_code == 200:
             return response.json()
 
     def post(self, json):
-        response = requests.post(
-            "%s/%s/%s" % (
-                object.__getattribute__(self, 'api').client.url,
-                object.__getattribute__(self, 'api').name,
-                object.__getattribute__(self, 'name')
-            ),
-            json=json,
-            headers=object.__getattribute__(self, 'api').headers
-        )
+        response = self._http(requests.post, json=json)
         if response.status_code == 201:
             return response.json()
 
@@ -110,31 +114,26 @@ class Collection(object):
         return self.__getattribute__(resource_id)
 
 
-class Resource(object):
+class Resource(AutoApiHttp):
 
-    def __init__(self, collection, resource_id):
-        self.collection = collection
-        self.resource_id = resource_id
-        response = requests.get(
-            "%s/%s/%s/%s" % (
-                collection.api.client.url,
-                collection.api.name,
-                collection.name,
-                resource_id
-            ),
-            headers=collection.api.headers
-        )
+    def __init__(self, parent, resource_id):
+        self.parent = parent
+        self.id = resource_id
+        response = self._http(requests.get)
         if response.status_code == 200:
             for key, value in response.json().iteritems():
                 object.__setattr__(self, key, value)
         else:
-            raise Exception("Not found resource")
+            raise AutoApiResourceException("Not found resource")
 
     def delete(self):
-        raise Exception("Not Implement !!!")
+        response = self._http(requests.delete)
+        return response.status_code == 204
 
-    def put(self, data):
-        raise Exception("Not Implement !!!")
+    def put(self, json):
+        response = self._http(requests.put, json=json)
+        return response.status_code == 204
 
-    def patch(self, data):
-        raise Exception("Not Implement !!!")
+    def patch(self, json):
+        response = self._http(requests.patch, json=json)
+        return response.status_code == 204

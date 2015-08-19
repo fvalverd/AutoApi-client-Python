@@ -3,3 +3,7 @@
 
 class AutoApiAuthException(Exception):
     pass
+
+
+class AutoApiResourceException(Exception):
+    pass
