@@ -27,6 +27,7 @@ class Api(object):
         self.client = client
         self.name = name
         self.logged = False
+        self.headers = {}
 
     def login(self, email, password):
         response = requests.post("%s/login" % self.client.url, json={
@@ -37,10 +38,20 @@ class Api(object):
         if response.status_code == 200:
             self.logged = True
             self.headers = {
-                'X-User': response.headers['X-Email'],
-                'X-Token': response.headers['X-Token']
+                'X-Email': response.headers.get('X-Email'),
+                'X-Token': response.headers.get('X-Token')
             }
+        else:
+            self.logged = False
+            self.headers = {}
         return self.logged
+
+    def logout(self):
+        response = requests.post("%s/logout" % self.client.url, json={
+            'api': self.name
+        })
+        self.logged = False
+        self.headers = {}
 
     def __getattribute__(self, name):
         try:
@@ -76,8 +87,18 @@ class Collection(object):
         if response.status_code == 200:
             return response.json()
 
-    def post(self, data):
-        raise Exception("Not Implement !!!")
+    def post(self, json):
+        response = requests.post(
+            "%s/%s/%s" % (
+                object.__getattribute__(self, 'api').client.url,
+                object.__getattribute__(self, 'api').name,
+                object.__getattribute__(self, 'name')
+            ),
+            json=json,
+            headers=object.__getattribute__(self, 'api').headers
+        )
+        if response.status_code == 201:
+            return response.json()
 
     def __getattribute__(self, resource_id):
         try:
@@ -86,7 +107,7 @@ class Collection(object):
             return Resource(self, resource_id)
 
     def __getitem__(self, resource_id):
-        return __getattribute__(resource_id)
+        return self.__getattribute__(resource_id)
 
 
 class Resource(object):
@@ -94,9 +115,20 @@ class Resource(object):
     def __init__(self, collection, resource_id):
         self.collection = collection
         self.resource_id = resource_id
-
-    def get(self):
-        raise Exception("Not Implement !!!")
+        response = requests.get(
+            "%s/%s/%s/%s" % (
+                object.__getattribute__(self, 'collection').api.client.url,
+                object.__getattribute__(self, 'collection').api.name,
+                object.__getattribute__(self, 'collection').name,
+                object.__getattribute__(self, 'resource_id')
+            ),
+            headers=object.__getattribute__(self, 'collection').api.headers
+        )
+        if response.status_code == 200:
+            for key, value in response.json().iteritems():
+                object.__setattr__(self, key, value)
+        else:
+            raise Exception("Not found resource")
 
     def delete(self):
         raise Exception("Not Implement !!!")
