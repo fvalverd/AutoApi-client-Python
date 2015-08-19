@@ -63,34 +63,46 @@ class Collection(object):
         self.api = api
         self.name = name
 
-    def __getattribute__(self, resource_id):
-        if resource_id in ['get', 'post']:
-            return object.__getattribute__(self, resource_id)
-        return Resource(self, resource_id)
-
-    def __getitem__(self, resource_id):
-        return Resource(self, resource_id)
-
-    def get(self, data):
-        raise Exception("Implement !!!")
+    def get(self, params=None):
+        response = requests.get(
+            "%s/%s/%s" % (
+                object.__getattribute__(self, 'api').client.url,
+                object.__getattribute__(self, 'api').name,
+                object.__getattribute__(self, 'name')
+            ),
+            params=params,
+            headers=object.__getattribute__(self, 'api').headers
+        )
+        if response.status_code == 200:
+            return response.json()
 
     def post(self, data):
-        raise Exception("Implement !!!")
+        raise Exception("Not Implement !!!")
+
+    def __getattribute__(self, resource_id):
+        try:
+            return object.__getattribute__(self, resource_id)
+        except AttributeError:
+            return Resource(self, resource_id)
+
+    def __getitem__(self, resource_id):
+        return __getattribute__(resource_id)
 
 
 class Resource(object):
 
     def __init__(self, collection, resource_id):
-        raise Exception("Implement !!!")
+        self.collection = collection
+        self.resource_id = resource_id
 
     def get(self):
-        raise Exception("Implement !!!")
+        raise Exception("Not Implement !!!")
 
     def delete(self):
-        raise Exception("Implement !!!")
+        raise Exception("Not Implement !!!")
 
     def put(self, data):
-        raise Exception("Implement !!!")
+        raise Exception("Not Implement !!!")
 
     def patch(self, data):
-        raise Exception("Implement !!!")
+        raise Exception("Not Implement !!!")

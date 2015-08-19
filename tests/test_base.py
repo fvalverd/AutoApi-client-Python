@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import unittest
 
 import requests_mock
@@ -8,10 +7,10 @@ from AutoApiClient import Api, Client, Collection
 from AutoApiClient.exceptions import AutoApiAuthException
 
 
-class TestStructure(unittest.TestCase):
+class TestBase(unittest.TestCase):
 
     def setUp(self):
-        super(TestStructure, self).setUp()
+        super(TestBase, self).setUp()
         self.url = 'http://localhost:8686'
         self.email = 'user@email.com'
         self.client = Client(self.url)
@@ -30,12 +29,8 @@ class TestStructure(unittest.TestCase):
         with self.assertRaises(AutoApiAuthException):
             self.client.api['collection']
 
-    def test_collection_instance(self):
-        with requests_mock.mock() as http:
-            http.post(
-                '%s/login' % self.url,
-                text=json.dumps({'email': self.email, 'token': '123'}),
-                headers={'X-Email': self.email, 'X-Token': '123'}
-            )
-            self.client.api.login(email=self.email, password='pass')
-            self.assertIsInstance(self.client.api.collection, Collection)
+    @requests_mock.mock()
+    def test_collection_instance(self, mock):
+        mock.post('%s/login' % self.url, headers={'X-Email': self.email, 'X-Token': '123'})
+        self.client.api.login(email=self.email, password='pass')
+        self.assertIsInstance(self.client.api.collection, Collection)
