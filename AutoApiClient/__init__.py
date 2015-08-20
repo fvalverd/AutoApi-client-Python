@@ -24,13 +24,14 @@ class Client(object):
 class AutoApiHttp(object):
 
     def url(self):
-        return "%s/%s" % (self.parent.url(), self.id)
+        url = self.parent.url
+        return "%s/%s" % (url if type(url) == str else url(), self.id)
 
     def _headers(self):
         return self.parent._headers()
 
-    def _http(self, fun, url=None, *a, **ka):
-        return fun(url or self.url(), headers=self._headers(), *a, **ka)
+    def _http(self, fun, url=None, **kargs):
+        return fun(url or self.url(), headers=self._headers(), **kargs)
 
 
 class Api(AutoApiHttp):
@@ -41,9 +42,6 @@ class Api(AutoApiHttp):
         self.logged = False
         self.headers = {}
 
-    def url(self):
-        return "%s/%s" % (self.parent.url, self.id)
-
     def _headers(self):
         return self.headers
 
@@ -53,15 +51,11 @@ class Api(AutoApiHttp):
             url="%s/login" % self.parent.url,
             params={'api': self.id, 'email': email, 'password': password}
         )
-        if response.status_code == 200:
-            self.logged = True
-            self.headers = {
-                'X-Email': response.headers.get('X-Email'),
-                'X-Token': response.headers.get('X-Token')
-            }
-        else:
-            self.logged = False
-            self.headers = {}
+        self.logged = response.status_code == 200
+        self.headers = {} if not self.logged else {
+            'X-Email': response.headers.get('X-Email'),
+            'X-Token': response.headers.get('X-Token')
+        }
         return self.logged
 
     def logout(self):
@@ -121,8 +115,10 @@ class Resource(AutoApiHttp):
         self.id = resource_id
         response = self._http(requests.get)
         if response.status_code == 200:
-            for key, value in response.json().iteritems():
-                object.__setattr__(self, key, value)
+            json = response.json()
+            self._items = json.keys()
+            for key in json:
+                object.__setattr__(self, key, json[key])
         else:
             raise AutoApiResourceException("Not found resource")
 
@@ -132,8 +128,21 @@ class Resource(AutoApiHttp):
 
     def put(self, json):
         response = self._http(requests.put, json=json)
+        for key in self._items:
+            if key != 'id':
+                object.__delattr__(self, key)
+        for key in json:
+            if key != 'id':
+                object.__setattr__(self, key, json[key])
+        self._items = json.keys()
         return response.status_code == 204
 
     def patch(self, json):
         response = self._http(requests.patch, json=json)
+        for key in json:
+            if key != 'id':
+                object.__setattr__(self, key, json[key])
         return response.status_code == 204
+
+    def __getitem__(self, resource_id):
+        return self.__getattribute__(resource_id)
