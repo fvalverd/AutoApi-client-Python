@@ -4,7 +4,7 @@ import unittest
 import requests_mock
 
 from AutoApiClient import Client, Resource
-from AutoApiClient.exceptions import AutoApiResourceException
+from AutoApiClient.exceptions import ResourceException
 
 
 @requests_mock.Mocker()
@@ -32,7 +32,7 @@ class TestResource(unittest.TestCase):
     def test_resource_not_found(self, mock):
         mock.get('%s/api/collection/id_1' % self.url, status_code=404)
         collection = self.client.api.collection
-        with self.assertRaises(AutoApiResourceException):
+        with self.assertRaises(ResourceException):
             collection.id_1
 
     def test_resource_attributes(self, mock):

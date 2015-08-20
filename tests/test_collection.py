@@ -4,16 +4,16 @@ import unittest
 import requests_mock
 
 from AutoApiClient import Client, Collection
-from AutoApiClient.exceptions import AutoApiAuthException
+from AutoApiClient.exceptions import AuthException
 
 
 class TestCollectionNotLogged(unittest.TestCase):
 
     def test_collection_auth_exception(self):
         client = Client('http://localhost:8686')
-        with self.assertRaises(AutoApiAuthException):
+        with self.assertRaises(AuthException):
             client.api.collection
-        with self.assertRaises(AutoApiAuthException):
+        with self.assertRaises(AuthException):
             client.api['collection']
 
 
@@ -57,5 +57,5 @@ class TestCollectionAfterLogout(unittest.TestCase):
             client.api.login(email='user@email.com', password='pass')
             self.assertIsInstance(client.api.collection, Collection)
             client.api.logout()
-            with self.assertRaises(AutoApiAuthException):
+            with self.assertRaises(AuthException):
                 client.api.collection

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 
-from AutoApiClient.exceptions import AutoApiAuthException, AutoApiResourceException
+from AutoApiClient.exceptions import AuthException, ResourceException
 
 
 class Client(object):
@@ -71,7 +71,7 @@ class Api(AutoApiHttp):
             setattr(self, name, Collection(self, name))
             self._collections.append(name)
             return self[name]
-        raise AutoApiAuthException("Api must be logged, use login method")
+        raise AuthException("Api must be logged, use login method")
 
     def __getitem__(self, name):
         return getattr(self, name)
@@ -107,7 +107,7 @@ class Resource(AutoApiHttp):
         self.id = resource_id
         response = self._http(requests.get)
         if response.status_code != 200:
-            raise AutoApiResourceException("Not found resource")
+            raise ResourceException("Not found resource")
         json = response.json()
         self._items = json.keys()
         for key in json:

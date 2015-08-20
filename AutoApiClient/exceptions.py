@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
-class AutoApiAuthException(Exception):
+class AuthException(Exception):
     pass
 
 
-class AutoApiResourceException(Exception):
+class ResourceException(Exception):
     pass
