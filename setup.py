@@ -27,11 +27,8 @@ setup(
     zip_safe=False,
     install_requires=[
         "requests==2.6.2"
-        # "flask-cors==2.0.0",
-        # "pymongo==2.8",
-        # "pyOpenSSL==0.14"
     ],
-    tests_require=['nose', 'requests_mock'],
+    tests_require=['nose', 'requests_mock', 'AutoApi'],
     test_suite="tests",
     entry_points="""
     # -*- Entry points: -*-

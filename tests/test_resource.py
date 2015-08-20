@@ -32,7 +32,8 @@ class TestResource(unittest.TestCase):
     def test_resource_not_found(self, mock):
         mock.get('%s/api/collection/id_1' % self.url, status_code=404)
         collection = self.client.api.collection
-        self.assertRaises(AutoApiResourceException, collection.__getattribute__, 'id_1')
+        with self.assertRaises(AutoApiResourceException):
+            collection.id_1
 
     def test_resource_attributes(self, mock):
         mock.get('%s/api/collection/id_1' % self.url, status_code=200, json=self.fixture['id_1'])
@@ -53,7 +54,8 @@ class TestResource(unittest.TestCase):
         self.assertEqual(resource.id, self.fixture['id_1']['id'])
         for key in self.fixture['id_1']:
             if key != 'id' and key not in self.fixture['id_2']:
-                self.assertRaises(AttributeError, object.__getattribute__, resource, key)
+                with self.assertRaises(AttributeError):
+                    resource[key]
         for key in self.fixture['id_2']:
             if key != 'id':
                 self.assertEqual(resource[key], self.fixture['id_2'][key])

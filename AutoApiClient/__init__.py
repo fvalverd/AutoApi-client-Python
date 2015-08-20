@@ -9,16 +9,12 @@ class Client(object):
     def __init__(self, url):
         self.url = url
 
-    def __getattribute__(self, name):
-        try:
-            return object.__getattribute__(self, name)
-        except Exception:
-            object.__setattr__(self, name, Api(self, name))
-        finally:
-            return object.__getattribute__(self, name)
+    def __getattr__(self, name):
+        setattr(self, name, Api(self, name))
+        return self[name]
 
     def __getitem__(self, name):
-        return self.__getattribute__(name)
+        return getattr(self, name)
 
 
 class AutoApiHttp(object):
@@ -41,6 +37,7 @@ class Api(AutoApiHttp):
         self.id = api_name
         self.logged = False
         self.headers = {}
+        self._collections = []
 
     def _headers(self):
         return self.headers
@@ -49,7 +46,7 @@ class Api(AutoApiHttp):
         response = self._http(
             requests.post,
             url="%s/login" % self.parent.url,
-            params={'api': self.id, 'email': email, 'password': password}
+            json={'api': self.id, 'email': email, 'password': password}
         )
         self.logged = response.status_code == 200
         self.headers = {} if not self.logged else {
@@ -66,20 +63,18 @@ class Api(AutoApiHttp):
         )
         self.logged = False
         self.headers = {}
+        for key in self._collections:
+            delattr(self, key)
 
-    def __getattribute__(self, name):
-        try:
-            return object.__getattribute__(self, name)
-        except AttributeError:
-            if not object.__getattribute__(self, 'logged'):
-                raise AutoApiAuthException(
-                    "You must be logged, use login method"
-                )
-            object.__setattr__(self, name, Collection(self, name))
-            return object.__getattribute__(self, name)
+    def __getattr__(self, name):
+        if self.logged:
+            setattr(self, name, Collection(self, name))
+            self._collections.append(name)
+            return self[name]
+        raise AutoApiAuthException("Api must be logged, use login method")
 
     def __getitem__(self, name):
-        return self.__getattribute__(name)
+        return getattr(self, name)
 
 
 class Collection(AutoApiHttp):
@@ -98,14 +93,11 @@ class Collection(AutoApiHttp):
         if response.status_code == 201:
             return response.json()
 
-    def __getattribute__(self, resource_id):
-        try:
-            return object.__getattribute__(self, resource_id)
-        except AttributeError:
-            return Resource(self, resource_id)
+    def __getattr__(self, resource_id):
+        return Resource(self, resource_id)
 
     def __getitem__(self, resource_id):
-        return self.__getattribute__(resource_id)
+        return getattr(self, resource_id)
 
 
 class Resource(AutoApiHttp):
@@ -114,13 +106,12 @@ class Resource(AutoApiHttp):
         self.parent = parent
         self.id = resource_id
         response = self._http(requests.get)
-        if response.status_code == 200:
-            json = response.json()
-            self._items = json.keys()
-            for key in json:
-                object.__setattr__(self, key, json[key])
-        else:
+        if response.status_code != 200:
             raise AutoApiResourceException("Not found resource")
+        json = response.json()
+        self._items = json.keys()
+        for key in json:
+            setattr(self, key, json[key])
 
     def delete(self):
         response = self._http(requests.delete)
@@ -130,10 +121,10 @@ class Resource(AutoApiHttp):
         response = self._http(requests.put, json=json)
         for key in self._items:
             if key != 'id':
-                object.__delattr__(self, key)
+                delattr(self, key)
         for key in json:
             if key != 'id':
-                object.__setattr__(self, key, json[key])
+                setattr(self, key, json[key])
         self._items = json.keys()
         return response.status_code == 204
 
@@ -141,8 +132,8 @@ class Resource(AutoApiHttp):
         response = self._http(requests.patch, json=json)
         for key in json:
             if key != 'id':
-                object.__setattr__(self, key, json[key])
+                setattr(self, key, json[key])
         return response.status_code == 204
 
     def __getitem__(self, resource_id):
-        return self.__getattribute__(resource_id)
+        return getattr(self, resource_id)
