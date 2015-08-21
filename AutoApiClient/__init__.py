@@ -88,7 +88,7 @@ class Collection(AutoApiHttp):
         if response.status_code == 200:
             return response.json()
 
-    def post(self, json):
+    def post(self, json=None):
         response = self._http(requests.post, json=json)
         if response.status_code == 201:
             return response.json()
