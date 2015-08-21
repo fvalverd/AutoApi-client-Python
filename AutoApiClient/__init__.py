@@ -117,22 +117,24 @@ class Resource(AutoApiHttp):
         response = self._http(requests.delete)
         return response.status_code == 204
 
-    def put(self, json):
+    def put(self, json=None):
         response = self._http(requests.put, json=json)
-        for key in self._items:
-            if key != 'id':
-                delattr(self, key)
-        for key in json:
-            if key != 'id':
-                setattr(self, key, json[key])
-        self._items = json.keys()
+        if response.status_code == 204:
+            for key in self._items:
+                if key != 'id':
+                    delattr(self, key)
+            for key in json:
+                if key != 'id':
+                    setattr(self, key, json[key])
+            self._items = json.keys()
         return response.status_code == 204
 
-    def patch(self, json):
+    def patch(self, json=None):
         response = self._http(requests.patch, json=json)
-        for key in json:
-            if key != 'id':
-                setattr(self, key, json[key])
+        if response.status_code == 204:
+            for key in json:
+                if key != 'id':
+                    setattr(self, key, json[key])
         return response.status_code == 204
 
     def __getitem__(self, resource_id):

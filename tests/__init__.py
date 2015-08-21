@@ -8,12 +8,15 @@ KEYS_TO_FIX = {
 }
 
 
-def _fix_kwargs(attribute):
+def _fix_kwargs(verb):
     def _http_verb(*args, **kwargs):
         for old_key, new_key in KEYS_TO_FIX.iteritems():
             if old_key in kwargs:
                 kwargs[new_key] = kwargs.pop(old_key)
-        response = attribute(*args, **kwargs)
+        if 'data' in kwargs:
+            kwargs['data'] = json.dumps(kwargs['data'])
+            kwargs['content_type'] = 'application/json'
+        response = verb(*args, **kwargs)
         response.json = lambda: json.loads(response.data)
         return response
     return _http_verb
