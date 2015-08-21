@@ -10,8 +10,8 @@ install:
   - pip install coveralls
   - pip install git+https://git@github.com/fvalverd/AutoApi#egg=AutoApi
 before_script:
-  - cp tests.cfg.default tests.cfg
+  - cp tests.cfg.default ~/tests.cfg
 script:
-  - AUTOAPI_SETTINGS=../AutoApi-client-Python/tests.cfg coverage run --source=AutoApiClient setup.py test
+  - AUTOAPI_SETTINGS=~/tests.cfg coverage run --source=AutoApiClient setup.py test
 after_script:
   - coveralls
