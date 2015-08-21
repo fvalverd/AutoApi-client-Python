@@ -28,7 +28,7 @@ setup(
     install_requires=[
         "requests==2.6.2"
     ],
-    tests_require=['nose', 'requests_mock', 'AutoApi'],
+    tests_require=['nose', 'requests_mock'],
     test_suite="tests",
     entry_points="""
     # -*- Entry points: -*-
