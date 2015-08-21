@@ -11,7 +11,7 @@ class TestAutoApi(FunctionalTests):
         self.clean('api', 'collection')
 
     def test_login_and_logout(self):
-        client = Client(self.dummy_url)
+        client = Client(self.test_url)
         with self.assertRaises(AuthException):
             client.api.collection
         self.assertTrue(client.api.login(email='admin', password='pass'))
@@ -21,14 +21,14 @@ class TestAutoApi(FunctionalTests):
             client.api.collection
 
     def test_empty_collection(self):
-        client = Client(self.dummy_url)
+        client = Client(self.test_url)
         client.api.login(email='admin', password='pass')
         result = client.api.collection.get()
         client.api.logout()
         self.assertItemsEqual(result, [])
 
     def test_insert_and_retrieve_an_element(self):
-        client = Client(self.dummy_url)
+        client = Client(self.test_url)
         client.api.login(email='admin', password='pass')
         item = client.api.collection.post(json={'key': 'value'})
 
@@ -41,7 +41,7 @@ class TestAutoApi(FunctionalTests):
         client.api.logout()
 
     def test_update_some_data(self):
-        client = Client(self.dummy_url)
+        client = Client(self.test_url)
         client.api.login(email='admin', password='pass')
         item = client.api.collection.post(json={'key': 'value'})
 
@@ -58,7 +58,7 @@ class TestAutoApi(FunctionalTests):
         client.api.logout()
 
     def test_replace_all_data(self):
-        client = Client(self.dummy_url)
+        client = Client(self.test_url)
         client.api.login(email='admin', password='pass')
         old_fields = {'key': 'value'}
         item = client.api.collection.post(json=old_fields)
@@ -84,7 +84,7 @@ class TestAutoApi(FunctionalTests):
         client.api.logout()
 
     def test_insert_and_remove_an_element(self):
-        client = Client(self.dummy_url)
+        client = Client(self.test_url)
         client.api.login(email='admin', password='pass')
         fields = {'key': 'value', 'value': 'key'}
         item = client.api.collection.post(json=fields)

@@ -49,7 +49,7 @@ class FunctionalTests(unittest.TestCase):
         super(FunctionalTests, cls).setUpClass()
         cls.client_mock = mock.patch('AutoApiClient.requests', ClientWrapper(app.test_client()))
         cls.client_mock.start()
-        cls.dummy_url = 'http://localhost:8686'
+        cls.test_url = 'http://localhost:8686'
 
     @classmethod
     def tearDownClass(cls):
