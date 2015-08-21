@@ -12,6 +12,6 @@ install:
 before_script:
   - cp tests.cfg.default tests.cfg
 script:
-  - AUTOAPI_SETTINGS=../AutoApiClient/tests.cfg coverage run --source=AutoApiClient setup.py test
+  - AUTOAPI_SETTINGS=../AutoApi-client-Python/tests.cfg coverage run --source=AutoApiClient setup.py test
 after_script:
   - coveralls
