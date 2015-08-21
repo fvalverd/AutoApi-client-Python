@@ -21,13 +21,13 @@ class AutoApiHttp(object):
 
     def url(self):
         url = self.parent.url
-        return "%s/%s" % (url if type(url) == str else url(), self.id)
+        return "%s/%s" % (url() if callable(url) else url, self.id)
 
-    def _headers(self):
-        return self.parent._headers()
+    def headers(self):
+        return self.parent.headers()
 
     def _http(self, fun, url=None, **kargs):
-        return fun(url or self.url(), headers=self._headers(), **kargs)
+        return fun(url or self.url(), headers=self.headers(), **kargs)
 
 
 class Api(AutoApiHttp):
@@ -36,11 +36,11 @@ class Api(AutoApiHttp):
         self.parent = parent
         self.id = api_name
         self.logged = False
-        self.headers = {}
+        self._headers = {}
         self._collections = []
 
-    def _headers(self):
-        return self.headers
+    def headers(self):
+        return self._headers
 
     def login(self, email, password):
         response = self._http(
@@ -49,7 +49,7 @@ class Api(AutoApiHttp):
             json={'api': self.id, 'email': email, 'password': password}
         )
         self.logged = response.status_code == 200
-        self.headers = {} if not self.logged else {
+        self._headers = {} if not self.logged else {
             'X-Email': response.headers.get('X-Email'),
             'X-Token': response.headers.get('X-Token')
         }
@@ -62,7 +62,7 @@ class Api(AutoApiHttp):
             json={'api': self.id}
         )
         self.logged = False
-        self.headers = {}
+        self._headers = {}
         for key in self._collections:
             delattr(self, key)
 

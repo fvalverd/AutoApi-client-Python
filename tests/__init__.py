@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 import json
+import mock
+import unittest
+
+from AutoApi import app
+from AutoApi.auth import _admin_manager_client
 
 
 KEYS_TO_FIX = {
@@ -35,3 +40,23 @@ class ClientWrapper(object):
 
     def __getitem__(self, name):
         return getattr(self, name)
+
+
+class FunctionalTests(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(FunctionalTests, cls).setUpClass()
+        cls.client_mock = mock.patch('AutoApiClient.requests', ClientWrapper(app.test_client()))
+        cls.client_mock.start()
+        cls.dummy_url = 'http://localhost:8686'
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.client_mock.stop()
+        super(FunctionalTests, cls).tearDownClass()
+
+    @staticmethod
+    def clean(api, collection):
+        with _admin_manager_client(app) as client:
+            client[api][collection].drop()

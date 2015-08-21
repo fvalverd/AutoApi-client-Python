@@ -1,34 +1,14 @@
 # -*- coding: utf-8 -*-
-import mock
-import unittest
-
-from AutoApi import app
-from AutoApi.auth import _admin_manager_client
-
 from AutoApiClient import Client, Collection
-from AutoApiClient.exceptions import AuthException
-from tests import ClientWrapper
+from AutoApiClient.exceptions import AuthException, ResourceException
+from tests import FunctionalTests
 
 
-class TestAutoApi(unittest.TestCase):
+class TestAutoApi(FunctionalTests):
 
-    @classmethod
-    def _clean_db(cls, app, api, collection):
-        with _admin_manager_client(app) as client:
-            client[api][collection].drop()
-
-    @classmethod
-    def setUpClass(cls):
-        super(TestAutoApi, cls).setUpClass()
-        cls._clean_db(app, 'api', 'collection')
-        cls.mock = mock.patch('AutoApiClient.requests', ClientWrapper(app.test_client()))
-        cls.mock.start()
-        cls.dummy_url = 'http://localhost:8686'
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.mock.stop()
-        super(TestAutoApi, cls).tearDownClass()
+    def setUp(self):
+        super(TestAutoApi, self).setUp()
+        self.clean('api', 'collection')
 
     def test_login_and_logout(self):
         client = Client(self.dummy_url)
@@ -100,5 +80,23 @@ class TestAutoApi(unittest.TestCase):
                     element[key]
         for key, value in new_fields.iteritems():
             self.assertEqual(element[key], value)
+
+        client.api.logout()
+
+    def test_insert_and_remove_an_element(self):
+        client = Client(self.dummy_url)
+        client.api.login(email='admin', password='pass')
+        fields = {'key': 'value', 'value': 'key'}
+        item = client.api.collection.post(json=fields)
+
+        self.assertIn('id', item)
+        element = client.api.collection[item['id']]
+        self.assertTrue(element.delete())
+
+        for key, value in fields.iteritems():
+            self.assertEqual(element[key], value)
+
+        with self.assertRaises(ResourceException):
+            client.api.collection[item['id']]
 
         client.api.logout()
