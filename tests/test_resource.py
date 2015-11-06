@@ -3,8 +3,8 @@ import unittest
 
 import requests_mock
 
-from AutoApiClient import Client, Resource
-from AutoApiClient.exceptions import ResourceException
+from auto_api_client import Client, Resource
+from auto_api_client.exceptions import ResourceException
 
 
 @requests_mock.Mocker()

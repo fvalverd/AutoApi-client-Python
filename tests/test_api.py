@@ -3,7 +3,7 @@ import unittest
 
 import requests_mock
 
-from AutoApiClient import Api, Client
+from auto_api_client import Api, Client
 
 
 class TestApi(unittest.TestCase):

@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 version = '0.0.1'
 
 setup(
-    name='AutoApiClient',
+    name='auto_api_client',
     version=version,
     description="Automatic API REST from Python",
     long_description="""""",
@@ -28,7 +28,7 @@ setup(
     install_requires=[
         "requests==2.6.2"
     ],
-    tests_require=['nose', 'requests_mock'],
+    tests_require=['nose', 'requests_mock', 'auto_api'],
     test_suite="tests",
     entry_points="""
     # -*- Entry points: -*-

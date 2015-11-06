@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 
-from AutoApiClient.exceptions import AuthException, ResourceException
+from .exceptions import AuthException, ResourceException
 
 
 class Client(object):

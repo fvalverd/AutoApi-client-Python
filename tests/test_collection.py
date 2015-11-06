@@ -3,8 +3,8 @@ import unittest
 
 import requests_mock
 
-from AutoApiClient import Client, Collection
-from AutoApiClient.exceptions import AuthException
+from auto_api_client import Client, Collection
+from auto_api_client.exceptions import AuthException
 
 
 class TestCollectionNotLogged(unittest.TestCase):

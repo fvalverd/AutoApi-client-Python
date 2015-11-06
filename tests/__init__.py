@@ -3,8 +3,8 @@ import json
 import mock
 import unittest
 
-from AutoApi import app
-from AutoApi.auth import _admin_manager_client
+from auto_api.app import app
+from auto_api.auth import _admin_manager_client
 
 
 KEYS_TO_FIX = {
@@ -47,7 +47,7 @@ class FunctionalTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(FunctionalTests, cls).setUpClass()
-        cls.client_mock = mock.patch('AutoApiClient.requests', ClientWrapper(app.test_client()))
+        cls.client_mock = mock.patch('auto_api_client.requests', ClientWrapper(app.test_client()))
         cls.client_mock.start()
         cls.test_url = 'http://localhost:8686'
 

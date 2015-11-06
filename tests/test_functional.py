@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from AutoApiClient import Client, Collection
-from AutoApiClient.exceptions import AuthException, ResourceException
+from auto_api_client import Client, Collection
+from auto_api_client.exceptions import AuthException, ResourceException
 from tests import FunctionalTests
 
 
