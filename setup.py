@@ -12,7 +12,7 @@ setup(
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
-        'Operating System :: GNU/Linux',
+        'Operating System :: POSIX',
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
@@ -21,12 +21,13 @@ setup(
     author='Felipe Valverde Campos',
     author_email='felipe.valverde.campos@gmail.com',
     url='https://github.com/fvalverd/AutoApi-Client-Python',
+    download_url='https://github.com/fvalverd/AutoApi-client-Python/tarball/0.0.1',
     license='MIT',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        "requests==2.6.2"
+        'requests==2.6.2'
     ],
     tests_require=['nose', 'requests_mock', 'auto_api'],
     test_suite="tests",
