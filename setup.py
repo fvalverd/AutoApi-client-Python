@@ -27,7 +27,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'requests==2.6.2'
+        'requests==2.20.0'
     ],
     tests_require=['nose', 'requests_mock', 'auto_api'],
     test_suite="tests",
